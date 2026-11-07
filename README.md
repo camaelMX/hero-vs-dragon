@@ -1,58 +1,91 @@
-# 《勇者斗恶龙：魔子》—— 灰盒原型
+# 勇者斗恶龙 ～复仇～
 
-Godot 4.7.2（标准版 / GDScript）。设计文档在 `GDD/` 目录（编辑器里被 `.gdignore` 隐藏，是给人迭代用的）。
+一款 Godot 4.7.2 卡牌 roguelike。你扮演勇者小队里的第四个人——一个听得懂魔物说话的见习圣骑士。
 
-## 现在能玩什么
+**你讨伐的恶龙，是你的父亲。**
 
-**灰盒 0-2：村庄→赶路循环** —— 村庄整备（教会回血 / 挑战等级旋钮 / 定神香 / 牧师安抚）→ 每步三选一怪卡 → 战斗 → 踩卡铺路 → 8 步一轮。SAN 计量、升级成长、掉落、战败重试/撤退全部接入。美术与音频为**程序化生成的占位资产**（`tools/` 下两个生成器，可随时重跑）。
+![标题](assets/art/cg_ai/TITLE_key_visual.png)
 
-## 怎么运行
+## 当前状态：第一幕 + 第二幕完整可玩
 
-1. 双击 Godot → **Import** → 选择本目录的 `project.godot` → **Import & Edit**
-2. 按 **F5** 运行
+- **第一幕**：村庄整备 → 8 步铺路（每步三选一怪卡）→ 龙巢 Boss 战 → 七拍真相时刻
+- **第二幕**：独自回程（人类卡池）→ 审判/释放抉择 → 处刑台决战勇者
+- **四结局全部可触发**（见下表）
+- 美术为 ComfyUI 生成的插画（CG×13、头像×16、双龙战斗立绘），音乐为 ACE-Step 生成的三首 BGM
+
+## 运行
+
+```bash
+# 方式一：脚本（自动导入新资产再启动）
+bash tools/play.sh
+
+# 方式二：Godot 编辑器
+# Import → 选择 project.godot → F5
+```
+
+系统需求：Godot 4.7.2 标准版、OpenGL 4.6 兼容显卡、中文字体（`sudo apt install fonts-noto-cjk`）。
 
 ## 操作
 
 | 键 | 作用 |
 |---|---|
-| 村庄按钮 | 教会回血 / 挑战等级 / 买定神香 / 牧师安抚 / 出发 |
-| 卡牌按钮 | 每步三选一（卡面有星级与奖励预告） |
-| 战斗按钮 | 攻击 / 血瓶 / 切反应预设 / 撤退 / 结束回合 |
-| 空格 | 防御 QTE（敌人攻击主角的瞬间按，按中黄色=完美防御） |
-| F | 闪避 QTE（窗口更小：成功=完全回避，失败=吃满+失去下回合） |
+| 空格 | 防御 QTE——怪物扑向主角的瞬间按（头顶有红"！"预警）；黄区=完美防御+反弹 |
+| F | 闪避 QTE——窗口更小；成功=完全回避+反击（攻×1.2 无视防御），失败=吃满+失衡 |
+| 按钮 | 三选一怪卡 / 攻击 / 血瓶 / 行商购物 / 审判·释放抉择 |
 
-## 自动冒烟测试（不开编辑器验证整个循环）
+## 四结局
+
+| 结局 | 触发条件 | 一句话 |
+|---|---|---|
+| 幻觉《白鸦》 | 真相时刻 SAN < 50 | 封印撑住了，他活在循环里 |
+| 复仇（第二幕·完） | 觉醒后沾过血，打赢处刑台 | 剑落进雪里，丧钟撞了七下 |
+| **真《不染雪》** | **第二幕 SAN 一滴不扣（全释放零杀）打穿处刑台** | 胜利靠真相，不靠刀剑 |
+| 魔化《勇者斗恶龙》 | 第二幕 SAN = 0 | 锁链崩断，恨到不再是人 |
+
+SAN 管理是核心技巧：战败 -10、审判 -15、安抚 +15 但永久 -5 最大生命（每局上限 6 次）。SAN < 50 命中 -10%，< 25 再 -20% + 心跳低语演出。
+
+## 特色系统
+
+- **怪卡三选一**：打赢的卡变成脚下的路——贪强卡=快但险，铺路步数决定遭遇强度（4-6 步威胁 +1 档，7-8 步 +2 档）
+- **QTE 只属于主角**：三名 AI 队友自行判断；防御完美弹反、闪避反击、审判官二连击链
+- **审判 / 释放**：第二幕每场人类战斗胜利后二选一——处决拿装备掉 SAN，放走收报恩留 SAN。你的每个决定都在决定结局
+- **金币的死亡是叙事**：第二幕打胜仗不掉金币——复仇路上钱已无意义
+
+## 技术栈
+
+- **引擎**：Godot 4.7.2 / GDScript（gl_compatibility 渲染，1280×720）
+- **数值**：伤害公式 `atk × 60/(60+def)`，经 3 策略 × 1000 局模拟校准（`tools/sim_balance.py`）
+- **美术管线**：本地 ComfyUI API（SDXL Illustrious2.5D），`tools/gen_cg_comfy.py` 单命令重出任意 CG/头像，固定 seed 可复现；战斗立绘走绿幕抠图管线
+- **音乐管线**：ACE-Step 本地推理（`tools/gen_music_ace.py`），BGM 同名替换零代码接入
+
+## 项目结构
+
+```
+GDD/                     设计文档 ×12（剧情/数值/资产清单/魔龙技能组）
+scripts/
+  data/game_state.gd     Autoload 全局状态（SAN/杀孽/装备/进度）
+  data/units_db.gd       数值总表（对应 GDD/07）
+  data/cards_db.gd       怪卡与终局 Boss 卡
+  combat/                回合引擎 + QTE + 队友 AI
+  run/run_scene.gd       村庄/铺路/剧情面板/四结局
+  ui/title_scene.gd      标题与序章三页
+scenes/                  三个场景 tscn
+assets/                  全部美术音频（按 GDD/09 规格，同名覆盖即替换）
+tools/                   生图/生音/模拟/试玩机器人/启动脚本
+```
+
+## 自动化测试
 
 ```bash
-AUTOPLAY=1 godot --headless --path .
+AUTOPLAY=1 godot --headless --path .                          # 全流程自动通关（exit=0 即通过）
+AUTOPLAY=1 AUTOPLAY_SPARE=1 godot --headless --path .         # 零杀线 → 真结局验证
+FORCE_LOW_SAN=1 AUTOPLAY=1 godot --headless --path .          # 幻觉结局分支
+BOT=1 godot --headless --path . + 挂载 tools/playtest_bot.gd   # 拟人操作机器人（QTE 掷骰画像）
 ```
 
-AI 会自动跑满 2 轮村庄-赶路循环后退出（exit=0 即通过）；终端输出战斗日志。
+## 致谢
 
-## 代码结构
-
-```
-scripts/
-  data/units_db.gd        数值总表（单位属性与 QTE 旋钮，对应 GDD/07）
-  data/cards_db.gd        怪卡定义（星级/经验/掉落/数量）
-  data/game_state.gd      Autoload 全局状态（SAN/金币/等级/进度，跨场景）
-  combat/fighter.gd       战斗单位：数据 + 占位像素外观
-  combat/qte_ring.gd      QTE 判定条（防御/闪避两种模式）
-  combat/party_ai.gd      AI 队友最小行为树
-  combat/combat_scene.gd  战斗主循环（回合引擎 + QTE 结算 + UI）
-  run/run_scene.gd        村庄/赶路循环（三选一卡牌 + 铺路 + SAN 面板）
-scenes/
-  run/run_scene.tscn      主场景
-  combat/combat_scene.tscn 战斗场景
-tools/
-  gen_sprites.py          程序化像素美术生成器（纯标准库）
-  gen_audio.py            程序化音效/BGM 生成器（纯标准库）
-assets/                   生成的占位资产（美术/音频），正式资产按 GDD/09 替换
-```
-
-## 已知占位 / 待办
-
-- 伤害公式已按模拟校准为乘法减伤 `atk × 60/(60+def)`（tools/sim_act1.py，三策略×1000 局验收）
-- 灰盒 0-3（第一幕 Boss 父王 + 觉醒 + SAN 闸门）未接入
-- 像素小人为程序化占位，正式美术按 `GDD/09_资产清单.md` 替换（同文件名覆盖即可）
-- 中文若显示方块 = 系统缺 CJK 字体：`sudo apt install fonts-noto-cjk`
+- 引擎：[Godot Engine](https://godotengine.org)
+- 美术：本地 ComfyUI + SDXL Illustrious2.5D（AI 生成）
+- 音乐：ACE-Step（AI 生成）
+- 字体：Noto Serif CJK
