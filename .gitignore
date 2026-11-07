@@ -1,0 +1,10 @@
+# Godot 自动生成的缓存目录（导入产物、shader 缓存等），不进版本库
+.godot/
+
+# 系统杂项
+*.tmp
+.DS_Store
+
+# Python 中间产物 / ACE 生成中间件
+__pycache__/
+outputs/

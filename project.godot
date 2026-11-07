@@ -1,0 +1,49 @@
+; ============================================================
+; 《勇者斗恶龙：魔子》Godot 工程配置
+; 引擎版本：Godot 4.7.2 stable（标准版，GDScript，非 .NET）
+; 灰盒阶段 0：村庄-选卡-战斗循环（见 GDD/08_开发计划.md）
+;
+; 注意：这个文件由 Godot 编辑器管理，不要用记事本手改。
+; ============================================================
+
+config_version=5
+
+[application]
+
+; 游戏名（窗口标题栏显示）。工程路径本身必须英文，名字可以中文。
+; 副题用"～复仇～"（2026-11-07 定稿）："魔子"会剧透第一幕真相，弃用。
+config/name="勇者斗恶龙 ～复仇～（灰盒）"
+
+; 主场景：程序启动 / F5 时加载的第一个场景。
+; 现在的流程：标题+序章 → 村庄/赶路循环 → 战斗按需切入。
+run/main_scene="res://scenes/ui/title_scene.tscn"
+
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+; 全局状态单例：跨场景保存 SAN/金币/等级/卡池进度（详见 scripts/data/game_state.gd）
+GameState="*res://scripts/data/game_state.gd"
+
+; 试玩机器人（tools/playtest_bot.gd，真人操作级 QA 用）：
+; 需要时临时加一行 PlaytestBot="*res://tools/playtest_bot.gd" 并设 BOT=1 启动
+
+[display]
+
+; 逻辑分辨率 1280x720。
+; 拉伸模式 canvas_items：窗口随便拉大缩小，画面内容等比缩放不糊 UI 布局。
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+; 兼容性渲染器（GL Compatibility）：老机器/虚拟机也能跑，灰盒阶段够用。
+; 以后要做光影再考虑换 Forward+。
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+; 像素风核心设置：纹理过滤 = Nearest（邻近采样）。
+; 不设这个，像素图放大后会出现模糊的插值边缘。
+textures/canvas_textures/default_texture_filter=0
