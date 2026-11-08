@@ -1,6 +1,9 @@
 # Godot 自动生成的缓存目录（导入产物、shader 缓存等），不进版本库
 .godot/
 
+# 导出产物：可执行包挂 GitHub Releases，不进 git 仓库
+exports/
+
 # 系统杂项
 *.tmp
 .DS_Store
