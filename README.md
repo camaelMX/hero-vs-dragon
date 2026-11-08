@@ -13,7 +13,16 @@
 - **四结局全部可触发**（见下表）
 - 美术为 ComfyUI 生成的插画（CG×13、头像×16、双龙战斗立绘），音乐为 ACE-Step 生成的三首 BGM
 
-## 运行
+## 下载游玩（无需安装 Godot）
+
+到 Releases 页下载对应平台 zip，解压双击即可：
+
+- GitHub：`https://github.com/camaelMX/hero-vs-dragon/releases`
+- Gitee（国内快）：`https://gitee.com/camael/hero-vs-dragon/releases`
+
+支持 Windows 10/11 64 位、Linux 64 位；包内含操作说明。如被杀毒软件拦截，选择"仍要运行"（游戏无数字签名）。
+
+## 运行（从源码）
 
 ```bash
 # 方式一：脚本（自动导入新资产再启动）
